@@ -1,5 +1,6 @@
 from random import choice
-from responder import WhatResponder, RandomResponder
+from responder import WhatResponder, RandomResponder, PatternResponder
+from dictionary import Dictionary
 
 
 class Unmo:
@@ -12,11 +13,15 @@ class Unmo:
 
     def __init__(self, name):
         """文字列を受け取り、コアインスタンスの名前に設定する。
-        WhatResponder, RandomResponderインスタンスを作成し、保持する。
+        Responder(What, Random, Pattern)インスタンスを作成し、保持する。
+        Dictionaryインスタンスを作成し、保持する。
         """
+        self._dictionary = Dictionary()
+
         self._responders = {
-            'what':   WhatResponder('What'),
-            'random': RandomResponder('Random'),
+            'what':   WhatResponder('What', self._dictionary),
+            'random': RandomResponder('Random', self._dictionary),
+            'pattern': PatternResponder('Pattern', self._dictionary),
         }
         self._name = name
         self._responder = self._responders['random']
