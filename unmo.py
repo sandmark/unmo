@@ -24,7 +24,7 @@ class Unmo:
             'pattern': PatternResponder('Pattern', self._dictionary),
         }
         self._name = name
-        self._responder = self._responders['random']
+        self._responder = self._responders['pattern']
 
     def dialogue(self, text):
         """ユーザーからの入力を受け取り、Responderに処理させた結果を返す。
