@@ -1,3 +1,4 @@
+import re
 from random import choice
 
 
@@ -11,9 +12,11 @@ class Responder:
     name -- Responderオブジェクトの名前
     """
 
-    def __init__(self, name):
-        """文字列を受け取り、自身のnameに設定する。"""
+    def __init__(self, name, dictionary):
+        """文字列nameを受け取り、自身のnameに設定する。
+        辞書dictionaryを受け取り、自身のdictionaryに保持する。"""
         self._name = name
+        self._dictionary = dictionary
 
     def response(self, *args):
         """文字列を受け取り、思考した結果を返す"""
@@ -37,13 +40,23 @@ class WhatResponder(Responder):
 class RandomResponder(Responder):
     """AIの応答を制御する思考エンジンクラス。
     登録された文字列からランダムなものを返す。
-
-    クラス変数:
-    RESPONSES -- 応答する文字列のリスト
     """
-
-    RESPONSES = ['今日はさむいね', 'チョコたべたい', 'きのう10円ひろった']
 
     def response(self, _):
         """ユーザーからの入力は受け取るが、使用せずにランダムな応答を返す。"""
-        return choice(RandomResponder.RESPONSES)
+        return choice(self._dictionary.random)
+
+
+class PatternResponder(Responder):
+    """AIの応答を制御する思考エンジンクラス。
+    登録されたパターンに反応し、関連する応答を返す。
+    """
+
+    def response(self, text):
+        """ユーザーの入力に合致するパターンがあれば、関連するフレーズを返す。"""
+        for ptn in self._dictionary.pattern:
+            matcher = re.search(ptn['pattern'], text)
+            if matcher:
+                chosen_response = choice(ptn['phrases'].split('|'))
+                return chosen_response.replace('%match%', matcher[0])
+        return choice(self._dictionary.random)
