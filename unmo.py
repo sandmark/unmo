@@ -1,4 +1,5 @@
 from random import choice, randrange
+from janome.tokenizer import Tokenizer
 from responder import WhatResponder, RandomResponder, PatternResponder
 from dictionary import Dictionary
 
@@ -15,7 +16,9 @@ class Unmo:
         """文字列を受け取り、コアインスタンスの名前に設定する。
         Responder(What, Random, Pattern)インスタンスを作成し、保持する。
         Dictionaryインスタンスを作成し、保持する。
+        Tokenizerインスタンスを作成し、保持する。
         """
+        self._tokenizer = Tokenizer()
         self._dictionary = Dictionary()
 
         self._responders = {
@@ -45,6 +48,10 @@ class Unmo:
     def save(self):
         """Dictionaryへの保存を行う。"""
         self._dictionary.save()
+
+    def analyze(self, text):
+        """文字列textを形態素解析し、[(surface, parts)]の形にして返す。"""
+        return [(t.surface, t.part_of_speech) for t in self._tokenizer.tokenize(text)]
 
     @property
     def name(self):
