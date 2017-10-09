@@ -37,10 +37,11 @@ class Dictionary:
 
     @staticmethod
     def make_pattern(line):
-        """文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。"""
+        """文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
+        [1]はさらに`|`で分割し、文字列のリストとする。"""
         pattern, phrases = line.split('\t')
         if pattern and phrases:
-            return {'pattern': pattern, 'phrases': phrases}
+            return {'pattern': pattern, 'phrases': phrases.split('|')}
 
     @property
     def random(self):
