@@ -42,6 +42,10 @@ class Unmo:
         self._dictionary.study(text)
         return response
 
+    def save(self):
+        """Dictionaryへの保存を行う。"""
+        self._dictionary.save()
+
     @property
     def name(self):
         """人工無脳インスタンスの名前"""
