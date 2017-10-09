@@ -24,6 +24,17 @@ class Dictionary:
         with open(Dictionary.DICT_PATTERN, encoding='utf-8') as f:
             self._pattern = [Dictionary.make_pattern(l) for l in f.read().splitlines() if l]
 
+    def study(self, text):
+        """ユーザーの発言textをメモリに保存する。
+        すでに同じ発言があった場合は何もしない。"""
+        if not text in self._random:
+            self._random.append(text)
+
+    def save(self):
+        """メモリ上の辞書をファイルに保存する。"""
+        with open(Dictionary.DICT_RANDOM, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(self.random))
+
     @staticmethod
     def make_pattern(line):
         """文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。"""
