@@ -1,4 +1,4 @@
-from random import choice
+from random import choice, randrange
 from responder import WhatResponder, RandomResponder, PatternResponder
 from dictionary import Dictionary
 
@@ -28,9 +28,16 @@ class Unmo:
 
     def dialogue(self, text):
         """ユーザーからの入力を受け取り、Responderに処理させた結果を返す。
-        呼び出されるたびにランダムでResponderを切り替える。"""
-        chosen_key = choice(list(self._responders.keys()))
-        self._responder = self._responders[chosen_key]
+        呼び出されるたびにランダムでResponderを切り替える。
+        入力をDictionaryに学習させる。"""
+        chance = randrange(0, 100)
+        if chance in range(0, 59):
+            self._responder = self._responders['pattern']
+        elif chance in range(60, 89):
+            self._responder = self._responders['random']
+        else:
+            self._responder = self._responders['what']
+
         return self._responder.response(text)
 
     @property
