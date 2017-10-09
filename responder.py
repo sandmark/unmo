@@ -57,6 +57,6 @@ class PatternResponder(Responder):
         for ptn in self._dictionary.pattern:
             matcher = re.search(ptn['pattern'], text)
             if matcher:
-                chosen_response = choice(ptn['phrases'].split('|'))
+                chosen_response = choice(ptn['phrases'])
                 return chosen_response.replace('%match%', matcher[0])
         return choice(self._dictionary.random)
