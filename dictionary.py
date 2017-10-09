@@ -1,4 +1,5 @@
 import re
+from janome.tokenizer import Tokenizer
 
 
 class Dictionary:
@@ -7,10 +8,12 @@ class Dictionary:
     クラス変数:
     DICT_RANDOM -- ランダム辞書のファイル名
     DICT_PATTERN -- パターン辞書のファイル名
+    TOKENIZER -- 形態素解析器
 
     スタティックメソッド:
     make_pattern(str) -- パターン辞書読み込み用のヘルパー
     pattern_to_line(pattern) -- パターンハッシュをパターン辞書形式に変換する
+    analyze(str) -- 文字列strを形態素解析する
 
     プロパティ:
     random -- ランダム辞書
@@ -19,6 +22,7 @@ class Dictionary:
 
     DICT_RANDOM = 'dics/random.txt'
     DICT_PATTERN = 'dics/pattern.txt'
+    TOKENIZER = Tokenizer()
 
     def __init__(self):
         """ファイルから辞書の読み込みを行う。"""
@@ -28,10 +32,10 @@ class Dictionary:
         with open(Dictionary.DICT_PATTERN, encoding='utf-8') as f:
             self._pattern = [Dictionary.make_pattern(l) for l in f.read().splitlines() if l]
 
-    def study(self, text, parts):
+    def study(self, text):
         """ランダム辞書、パターン辞書をメモリに保存する。"""
         self.study_random(text)
-        self.study_pattern(text, parts)
+        self.study_pattern(text, Dictionary.analyze(text))
 
     def study_random(self, text):
         """ユーザーの発言textをランダム辞書に保存する。
@@ -47,8 +51,9 @@ class Dictionary:
                 # 同じ単語で登録されていれば、パターンを追加する
                 # 無ければ新しいパターンを作成する
                 duplicated = next((p for p in self._pattern if p['pattern'] == word), None)
-                if duplicated and not text in duplicated['phrases']:
-                    duplicated['phrases'].append(text)
+                if duplicated:
+                    if not text in duplicated['phrases']:
+                        duplicated['phrases'].append(text)
                 else:
                     self._pattern.append({'pattern': word, 'phrases': [text]})
 
@@ -59,6 +64,11 @@ class Dictionary:
 
         with open(Dictionary.DICT_PATTERN, mode='w', encoding='utf-8') as f:
             f.write('\n'.join([Dictionary.pattern_to_line(p) for p in self._pattern]))
+
+    @staticmethod
+    def analyze(text):
+        """文字列textを形態素解析し、[(surface, parts)]の形にして返す。"""
+        return [(t.surface, t.part_of_speech) for t in Dictionary.TOKENIZER.tokenize(text)]
 
     @staticmethod
     def pattern_to_line(pattern):

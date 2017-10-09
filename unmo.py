@@ -42,17 +42,12 @@ class Unmo:
             self._responder = self._responders['what']
 
         response = self._responder.response(text)
-        parts = self.__analyze(text)
-        self._dictionary.study(text, parts)
+        self._dictionary.study(text)
         return response
 
     def save(self):
         """Dictionaryへの保存を行う。"""
         self._dictionary.save()
-
-    def __analyze(self, text):
-        """文字列textを形態素解析し、[(surface, parts)]の形にして返す。"""
-        return [(t.surface, t.part_of_speech) for t in self._tokenizer.tokenize(text)]
 
     @property
     def name(self):
