@@ -15,12 +15,7 @@ if __name__ == '__main__':
         if not text:
             break
 
-        try:
-            response = proto.dialogue(text)
-        except IndexError as error:
-            print('{}: {}'.format(type(error).__name__, str(error)))
-            print('警告: 辞書が空です。(Responder: {})'.format(proto.responder_name))
-        else:
-            print('{prompt}{response}'.format(prompt=build_prompt(proto),
-                                              response=response))
+        response = proto.dialogue(text)
+        print('{prompt}{response}'.format(prompt=build_prompt(proto),
+                                          response=response))
     proto.save()
