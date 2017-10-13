@@ -1,4 +1,4 @@
-from random import choice, randrange
+from random import randrange
 from janome.tokenizer import Tokenizer
 from responder import WhatResponder, RandomResponder, PatternResponder, TemplateResponder
 from dictionary import Dictionary
