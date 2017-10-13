@@ -1,6 +1,8 @@
 import os.path
 from collections import defaultdict
 import morph
+from markov import Markov
+from util import format_error
 
 
 class Dictionary:
@@ -11,9 +13,13 @@ class Dictionary:
     DICT_PATTERN -- パターン辞書のファイル名
 
     スタティックメソッド:
-    touch_dics() -- 辞書ファイルにtouch処理を行う
     make_pattern(str) -- パターン辞書読み込み用のヘルパー
     pattern_to_line(pattern) -- パターンハッシュをパターン辞書形式に変換する
+
+    load_random(file) -- fileからランダム辞書の読み込みを行う
+    load_pattern(file) -- fileからパターン辞書の読み込みを行う
+    load_template(file) -- fileからテンプレート辞書の読み込みを行う
+    load_markov(file) -- fileからマルコフ辞書の読み込みを行う
 
     プロパティ:
     random -- ランダム辞書
@@ -24,24 +30,15 @@ class Dictionary:
     DICT = {'random': 'dics/random.txt',
             'pattern': 'dics/pattern.txt',
             'template': 'dics/template.txt',
+            'markov': 'dics/markov.dat',
             }
 
     def __init__(self):
         """ファイルから辞書の読み込みを行う。"""
-        Dictionary.touch_dics()
-        with open(Dictionary.DICT['random'], encoding='utf-8') as f:
-            self._random = [l for l in f.read().splitlines() if l]
-
-        with open(Dictionary.DICT['pattern'], encoding='utf-8') as f:
-            self._pattern = [Dictionary.make_pattern(l) for l in f.read().splitlines() if l]
-
-        with open(Dictionary.DICT['template'], encoding='utf-8') as f:
-            self._template = defaultdict(lambda: [], {})  # set dict default value to []
-            for line in f:
-                count, template = line.strip().split('\t')
-                if count and template:
-                    count = int(count)
-                    self._template[count].append(template)
+        self._random = Dictionary.load_random(Dictionary.DICT['random'])
+        self._pattern = Dictionary.load_pattern(Dictionary.DICT['pattern'])
+        self._template = Dictionary.load_template(Dictionary.DICT['template'])
+        self._markov = Dictionary.load_markov(Dictionary.DICT['markov'])
 
     def study(self, text, parts):
         """ランダム辞書、パターン辞書、テンプレート辞書をメモリに保存する。"""
@@ -99,6 +96,53 @@ class Dictionary:
                     f.write('{}\t{}\n'.format(count, template))
 
     @staticmethod
+    def load_random(filename):
+        """filenameをランダム辞書として読み込み、リストを返す"""
+        try:
+            with open(filename, encoding='utf-8') as f:
+                return [l for l in f.read().splitlines() if l]
+        except IOError as e:
+            print(format_error(e))
+            return ['こんにちは']
+
+    @staticmethod
+    def load_pattern(filename):
+        """filenameをパターン辞書として読み込み、リストを返す"""
+        try:
+            with open(filename, encoding='utf-8') as f:
+                return [Dictionary.make_pattern(l) for l
+                        in f.read().splitlines() if l]
+        except IOError as e:
+            print(format_error(e))
+            return []
+
+    @staticmethod
+    def load_template(filename):
+        """filenameをテンプレート辞書として読み込み、ハッシュを返す"""
+        templates = defaultdict(lambda: [])
+        try:
+            with open(filename, encoding='utf-8') as f:
+                for line in f:
+                    count, template = line.strip().split('\t')
+                    if count and template:
+                        count = int(count)
+                        templates[count].append(template)
+            return templates
+        except IOError as e:
+            print(format_error(e))
+            return templates
+
+    @staticmethod
+    def load_markov(filename):
+        """Markovオブジェクトを生成し、filenameから読み込みを行う。"""
+        markov = Markov()
+        try:
+            markov.load(filename)
+        except IOError as e:
+            print(format_error(e))
+        return markov
+
+    @staticmethod
     def pattern_to_line(pattern):
         """パターンのハッシュを文字列に変換する。"""
         return '{}\t{}'.format(pattern['pattern'], '|'.join(pattern['phrases']))
@@ -110,13 +154,6 @@ class Dictionary:
         pattern, phrases = line.split('\t')
         if pattern and phrases:
             return {'pattern': pattern, 'phrases': phrases.split('|')}
-
-    @staticmethod
-    def touch_dics():
-        """辞書ファイルがなければ空のファイルを作成し、あれば何もしない。"""
-        for dic in Dictionary.DICT.values():
-            if not os.path.exists(dic):
-                open(dic, 'w').close()
 
     @property
     def random(self):
