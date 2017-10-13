@@ -1,4 +1,3 @@
-import os.path
 from collections import defaultdict
 import morph
 from markov import Markov
