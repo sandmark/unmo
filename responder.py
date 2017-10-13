@@ -75,3 +75,12 @@ class TemplateResponder(Responder):
                     template = template.replace('%noun%', keyword, 1)
                 return template
         return choice(self._dictionary.random)
+
+
+class MarkovResponder(Responder):
+    def response(self, _, parts):
+        """形態素のリストpartsからキーワードを選択し、それに基づく文章を生成して返す。
+        キーワードに該当するものがなかった場合はランダム辞書から返す。"""
+        keyword = next((w for w, p in parts if morph.is_keyword(p)), '')
+        response = self._dictionary.markov.generate(keyword)
+        return response if response else choice(self._dictionary.random)
