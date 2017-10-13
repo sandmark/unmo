@@ -44,6 +44,11 @@ class Dictionary:
         self.study_random(text)
         self.study_pattern(text, parts)
         self.study_template(parts)
+        self.study_markov(parts)
+
+    def study_markov(self, parts):
+        """形態素のリストpartsを受け取り、マルコフ辞書に学習させる。"""
+        self._markov.add_sentence(parts)
 
     def study_template(self, parts):
         """形態素のリストpartsを受け取り、
@@ -93,6 +98,8 @@ class Dictionary:
             for count, templates in self._template.items():
                 for template in templates:
                     f.write('{}\t{}\n'.format(count, template))
+
+        self._markov.save(Dictionary.DICT['markov'])
 
     @staticmethod
     def load_random(filename):
@@ -168,3 +175,8 @@ class Dictionary:
     def template(self):
         """テンプレート辞書"""
         return self._template
+
+    @property
+    def markov(self):
+        """マルコフ辞書"""
+        return self._markov
