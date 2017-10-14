@@ -69,7 +69,7 @@ class Dictionary:
     def study_random(self, text):
         """ユーザーの発言textをランダム辞書に保存する。
         すでに同じ発言があった場合は何もしない。"""
-        if not text in self._random:
+        if text not in self._random:
             self._random.append(text)
 
     def study_pattern(self, text, parts):
@@ -81,7 +81,7 @@ class Dictionary:
                 # 無ければ新しいパターンを作成する
                 duplicated = next((p for p in self._pattern if p['pattern'] == word), None)
                 if duplicated:
-                    if not text in duplicated['phrases']:
+                    if text not in duplicated['phrases']:
                         duplicated['phrases'].append(text)
                 else:
                     self._pattern.append({'pattern': word, 'phrases': [text]})
