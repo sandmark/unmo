@@ -150,14 +150,16 @@ class Dictionary:
         templates = defaultdict(lambda: [])
         try:
             with open(filename, encoding='utf-8') as f:
-                for line in f:
-                    count, template = line.strip().split('\t')
-                    if count and template:
-                        count = int(count)
-                        templates[count].append(template)
-            return templates
+                lines = f.read().splitlines()
         except IOError as e:
             print(format_error(e))
+        else:
+            for line in lines:
+                count, template = line.split('\t')
+                if count and template:
+                    count = int(count)
+                    templates[count].append(template)
+        finally:
             return templates
 
     @staticmethod
