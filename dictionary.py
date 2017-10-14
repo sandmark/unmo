@@ -147,7 +147,7 @@ class Dictionary:
         filename = filename if filename else Dictionary.DICT['template']
         templates = defaultdict(lambda: [])
         for line in Dictionary.__load_file_as_lines(filename):
-            count, template = line.split('/t')
+            count, template = line.split('\t')
             if count and template:
                 count = int(count)
                 templates[count].append(template)
