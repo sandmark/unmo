@@ -89,18 +89,35 @@ class Dictionary:
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
-        with open(Dictionary.DICT['random'], mode='w', encoding='utf-8') as f:
-            f.write('\n'.join(self.random))
+        self._save_random()
+        self._save_pattern()
+        self._save_template()
+        self._markov.save(Dictionary.DICT['markov'])
 
-        with open(Dictionary.DICT['pattern'], mode='w', encoding='utf-8') as f:
-            f.write('\n'.join([Dictionary.pattern_to_line(p) for p in self._pattern]))
-
+    def _save_template(self, dicfile=None):
+        """テンプレート辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['template']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['template']
         with open(Dictionary.DICT['template'], mode='w', encoding='utf-8') as f:
             for count, templates in self._template.items():
                 for template in templates:
                     f.write('{}\t{}\n'.format(count, template))
 
-        self._markov.save(Dictionary.DICT['markov'])
+    def _save_pattern(self, dicfile=None):
+        """パターン辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['pattern']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['pattern']
+
+        lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
+        with open(dicfile, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+
+    def _save_random(self, dicfile=None):
+        """ランダム辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['random']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['random']
+        with open(dicfile, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(self.random))
 
     def _find_duplicated_pattern(self, word):
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
