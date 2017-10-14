@@ -75,16 +75,17 @@ class Dictionary:
     def study_pattern(self, text, parts):
         """ユーザーの発言textを、形態素partsに基づいてパターン辞書に保存する。"""
         for word, part in parts:
-            if morph.is_keyword(part):  # 品詞が名詞であれば学習
-                # 単語の重複チェック
-                # 同じ単語で登録されていれば、パターンを追加する
-                # 無ければ新しいパターンを作成する
-                duplicated = next((p for p in self._pattern if p['pattern'] == word), None)
-                if duplicated:
-                    if text not in duplicated['phrases']:
-                        duplicated['phrases'].append(text)
-                else:
-                    self._pattern.append({'pattern': word, 'phrases': [text]})
+            if not morph.is_keyword(part):  # 品詞が名詞でなければ学習しない
+                continue
+
+            # 単語の重複チェック
+            # 同じ単語で登録されていれば、パターンを追加する
+            # 無ければ新しいパターンを作成する
+            duplicated = self._find_duplicated_pattern(word)
+            if duplicated and text not in duplicated['phrases']:
+                duplicated['phrases'].append(text)
+            else:
+                self._pattern.append({'pattern': word, 'phrases': [text]})
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
@@ -100,6 +101,10 @@ class Dictionary:
                     f.write('{}\t{}\n'.format(count, template))
 
         self._markov.save(Dictionary.DICT['markov'])
+
+    def _find_duplicated_pattern(self, word):
+        """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
+        return next((p for p in self._pattern if p['pattern'] == word), None)
 
     @staticmethod
     def load_random(filename):
