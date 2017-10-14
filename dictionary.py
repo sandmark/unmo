@@ -125,42 +125,45 @@ class Dictionary:
 
     @staticmethod
     def load_random(filename):
-        """filenameをランダム辞書として読み込み、リストを返す"""
-        try:
-            with open(filename, encoding='utf-8') as f:
-                return [l for l in f.read().splitlines() if l]
-        except IOError as e:
-            print(format_error(e))
-            return ['こんにちは']
+        """filenameをランダム辞書として読み込み、リストを返す。
+        filenameのデフォルト値はDictionary.DICT['random']
+        戻り値のリストが空である場合、['こんにちは']という一文を追加する。"""
+        filename = filename if filename else Dictionary.DICT['random']
+        lines = Dictionary.__load_file_as_lines(filename)
+        return lines if lines else ['こんにちは']
 
     @staticmethod
-    def load_pattern(filename):
-        """filenameをパターン辞書として読み込み、リストを返す"""
-        try:
-            with open(filename, encoding='utf-8') as f:
-                return [Dictionary.make_pattern(l) for l
-                        in f.read().splitlines() if l]
-        except IOError as e:
-            print(format_error(e))
-            return []
+    def load_pattern(filename=None):
+        """filenameをパターン辞書として読み込み、リストを返す。
+        filenameのデフォルト値はDictionary.DICT['pattern']"""
+        filename = filename if filename else Dictionary.DICT['pattern']
+        lines = Dictionary.__load_file_as_lines(filename)
+        return map(Dictionary.make_pattern, lines)
 
     @staticmethod
-    def load_template(filename):
-        """filenameをテンプレート辞書として読み込み、ハッシュを返す"""
+    def load_template(filename=None):
+        """filenameをテンプレート辞書として読み込み、ハッシュを返す。
+        filenameのデフォルト値はDictionary.DICT['template']"""
+        filename = filename if filename else Dictionary.DICT['template']
         templates = defaultdict(lambda: [])
+        for line in Dictionary.__load_file_as_lines(filename):
+            count, template = line.split('/t')
+            if count and template:
+                count = int(count)
+                templates[count].append(template)
+        return templates
+
+    @staticmethod
+    def __load_file_as_lines(filename):
+        """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
+        例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
         try:
             with open(filename, encoding='utf-8') as f:
                 lines = f.read().splitlines()
         except IOError as e:
             print(format_error(e))
-        else:
-            for line in lines:
-                count, template = line.split('\t')
-                if count and template:
-                    count = int(count)
-                    templates[count].append(template)
         finally:
-            return templates
+            return lines if lines else []
 
     @staticmethod
     def load_markov(filename):
