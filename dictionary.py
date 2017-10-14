@@ -69,74 +69,101 @@ class Dictionary:
     def study_random(self, text):
         """ユーザーの発言textをランダム辞書に保存する。
         すでに同じ発言があった場合は何もしない。"""
-        if not text in self._random:
+        if text not in self._random:
             self._random.append(text)
 
     def study_pattern(self, text, parts):
         """ユーザーの発言textを、形態素partsに基づいてパターン辞書に保存する。"""
         for word, part in parts:
-            if morph.is_keyword(part):  # 品詞が名詞であれば学習
-                # 単語の重複チェック
-                # 同じ単語で登録されていれば、パターンを追加する
-                # 無ければ新しいパターンを作成する
-                duplicated = next((p for p in self._pattern if p['pattern'] == word), None)
-                if duplicated:
-                    if not text in duplicated['phrases']:
-                        duplicated['phrases'].append(text)
-                else:
-                    self._pattern.append({'pattern': word, 'phrases': [text]})
+            if not morph.is_keyword(part):  # 品詞が名詞でなければ学習しない
+                continue
+
+            # 単語の重複チェック
+            # 同じ単語で登録されていれば、パターンを追加する
+            # 無ければ新しいパターンを作成する
+            duplicated = self._find_duplicated_pattern(word)
+            if duplicated and text not in duplicated['phrases']:
+                duplicated['phrases'].append(text)
+            else:
+                self._pattern.append({'pattern': word, 'phrases': [text]})
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
-        with open(Dictionary.DICT['random'], mode='w', encoding='utf-8') as f:
-            f.write('\n'.join(self.random))
+        self._save_random()
+        self._save_pattern()
+        self._save_template()
+        self._markov.save(Dictionary.DICT['markov'])
 
-        with open(Dictionary.DICT['pattern'], mode='w', encoding='utf-8') as f:
-            f.write('\n'.join([Dictionary.pattern_to_line(p) for p in self._pattern]))
-
+    def _save_template(self, dicfile=None):
+        """テンプレート辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['template']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['template']
         with open(Dictionary.DICT['template'], mode='w', encoding='utf-8') as f:
             for count, templates in self._template.items():
                 for template in templates:
                     f.write('{}\t{}\n'.format(count, template))
 
-        self._markov.save(Dictionary.DICT['markov'])
+    def _save_pattern(self, dicfile=None):
+        """パターン辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['pattern']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['pattern']
+
+        lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
+        with open(dicfile, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(lines))
+
+    def _save_random(self, dicfile=None):
+        """ランダム辞書をdicfileに保存する。
+        dicfileのデフォルト値はDictionary.DICT['random']"""
+        dicfile = dicfile if dicfile is not None else Dictionary.DICT['random']
+        with open(dicfile, mode='w', encoding='utf-8') as f:
+            f.write('\n'.join(self.random))
+
+    def _find_duplicated_pattern(self, word):
+        """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
+        return next((p for p in self._pattern if p['pattern'] == word), None)
 
     @staticmethod
     def load_random(filename):
-        """filenameをランダム辞書として読み込み、リストを返す"""
-        try:
-            with open(filename, encoding='utf-8') as f:
-                return [l for l in f.read().splitlines() if l]
-        except IOError as e:
-            print(format_error(e))
-            return ['こんにちは']
+        """filenameをランダム辞書として読み込み、リストを返す。
+        filenameのデフォルト値はDictionary.DICT['random']
+        戻り値のリストが空である場合、['こんにちは']という一文を追加する。"""
+        filename = filename if filename else Dictionary.DICT['random']
+        lines = Dictionary.__load_file_as_lines(filename)
+        return lines if lines else ['こんにちは']
 
     @staticmethod
-    def load_pattern(filename):
-        """filenameをパターン辞書として読み込み、リストを返す"""
-        try:
-            with open(filename, encoding='utf-8') as f:
-                return [Dictionary.make_pattern(l) for l
-                        in f.read().splitlines() if l]
-        except IOError as e:
-            print(format_error(e))
-            return []
+    def load_pattern(filename=None):
+        """filenameをパターン辞書として読み込み、リストを返す。
+        filenameのデフォルト値はDictionary.DICT['pattern']"""
+        filename = filename if filename else Dictionary.DICT['pattern']
+        lines = Dictionary.__load_file_as_lines(filename)
+        return map(Dictionary.make_pattern, lines)
 
     @staticmethod
-    def load_template(filename):
-        """filenameをテンプレート辞書として読み込み、ハッシュを返す"""
+    def load_template(filename=None):
+        """filenameをテンプレート辞書として読み込み、ハッシュを返す。
+        filenameのデフォルト値はDictionary.DICT['template']"""
+        filename = filename if filename else Dictionary.DICT['template']
         templates = defaultdict(lambda: [])
+        for line in Dictionary.__load_file_as_lines(filename):
+            count, template = line.split('/t')
+            if count and template:
+                count = int(count)
+                templates[count].append(template)
+        return templates
+
+    @staticmethod
+    def __load_file_as_lines(filename):
+        """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
+        例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
         try:
             with open(filename, encoding='utf-8') as f:
-                for line in f:
-                    count, template = line.strip().split('\t')
-                    if count and template:
-                        count = int(count)
-                        templates[count].append(template)
-            return templates
+                lines = f.read().splitlines()
         except IOError as e:
             print(format_error(e))
-            return templates
+        finally:
+            return lines if lines else []
 
     @staticmethod
     def load_markov(filename):
