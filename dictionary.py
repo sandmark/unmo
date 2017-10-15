@@ -2,6 +2,7 @@ from collections import defaultdict
 import morph
 from markov import Markov
 from util import format_error
+import functools
 
 
 class Dictionary:
@@ -94,30 +95,36 @@ class Dictionary:
         self._save_template()
         self._markov.save(Dictionary.DICT['markov'])
 
-    def _save_template(self, dicfile=None):
-        """テンプレート辞書をdicfileに保存する。
-        dicfileのデフォルト値はDictionary.DICT['template']"""
-        dicfile = dicfile if dicfile is not None else Dictionary.DICT['template']
-        with open(Dictionary.DICT['template'], mode='w', encoding='utf-8') as f:
-            for count, templates in self._template.items():
-                for template in templates:
-                    f.write('{}\t{}\n'.format(count, template))
+    def save_dictionary(dict_key):
+        """
+        辞書を保存するためのファイルを開くデコレータ。
+        dict_key - Dictionary.DICTのキー。
+        """
+        def _save_file(func):
+            @functools.wraps(func)
+            def wrapper(self, *args, **kwargs):
+                with open(Dictionary.DICT[dict_key], 'w', encoding='utf-8') as f:
+                    return func(self, f, *args, **kwargs)
+            return wrapper
+        return _save_file
 
-    def _save_pattern(self, dicfile=None):
-        """パターン辞書をdicfileに保存する。
-        dicfileのデフォルト値はDictionary.DICT['pattern']"""
-        dicfile = dicfile if dicfile is not None else Dictionary.DICT['pattern']
+    @save_dictionary('template')
+    def _save_template(self, f):
+        """テンプレート辞書を保存する。"""
+        for count, templates in self._template.items():
+            for template in templates:
+                f.write('{}\t{}\n'.format(count, template))
 
+    @save_dictionary('pattern')
+    def _save_pattern(self, f):
+        """パターン辞書を保存する。"""
         lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
-        with open(dicfile, mode='w', encoding='utf-8') as f:
-            f.write('\n'.join(lines))
+        f.write('\n'.join(lines))
 
-    def _save_random(self, dicfile=None):
-        """ランダム辞書をdicfileに保存する。
-        dicfileのデフォルト値はDictionary.DICT['random']"""
-        dicfile = dicfile if dicfile is not None else Dictionary.DICT['random']
-        with open(dicfile, mode='w', encoding='utf-8') as f:
-            f.write('\n'.join(self.random))
+    @save_dictionary('random')
+    def _save_random(self, f):
+        """ランダム辞書をdicfileに保存する。"""
+        f.write('\n'.join(self.random))
 
     def _find_duplicated_pattern(self, word):
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
