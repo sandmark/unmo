@@ -138,7 +138,7 @@ class Dictionary:
         filenameのデフォルト値はDictionary.DICT['pattern']"""
         filename = filename if filename else Dictionary.DICT['pattern']
         lines = Dictionary.__load_file_as_lines(filename)
-        return map(Dictionary.make_pattern, lines)
+        return [Dictionary.make_pattern(l) for l in lines]
 
     @staticmethod
     def load_template(filename=None):
