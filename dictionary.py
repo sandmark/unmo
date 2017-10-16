@@ -100,31 +100,35 @@ class Dictionary:
         辞書を保存するためのファイルを開くデコレータ。
         dict_key - Dictionary.DICTのキー。
         """
-        def _save_file(func):
+        def _save_dictionary(func):
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
                 with open(Dictionary.DICT[dict_key], 'w', encoding='utf-8') as f:
-                    return func(self, f, *args, **kwargs)
+                    result = func(self, *args, **kwargs)
+                    f.write(result)
+                return result
             return wrapper
-        return _save_file
+        return _save_dictionary
 
     @save_dictionary('template')
-    def _save_template(self, f):
+    def _save_template(self):
         """テンプレート辞書を保存する。"""
+        lines = []
         for count, templates in self._template.items():
             for template in templates:
-                f.write('{}\t{}\n'.format(count, template))
+                lines.append('{}\t{}'.format(count, template))
+        return '\n'.join(lines)
 
     @save_dictionary('pattern')
-    def _save_pattern(self, f):
+    def _save_pattern(self):
         """パターン辞書を保存する。"""
         lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
-        f.write('\n'.join(lines))
+        return '\n'.join(lines)
 
     @save_dictionary('random')
-    def _save_random(self, f):
-        """ランダム辞書をdicfileに保存する。"""
-        f.write('\n'.join(self.random))
+    def _save_random(self):
+        """ランダム辞書を保存する。"""
+        return '\n'.join(self.random)
 
     def _find_duplicated_pattern(self, word):
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
