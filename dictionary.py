@@ -188,13 +188,25 @@ class Dictionary:
 
     @staticmethod
     def pattern_to_line(pattern):
-        """パターンのハッシュを文字列に変換する。"""
+        """
+        パターンのハッシュを文字列に変換する。
+
+        >>> pattern = {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
+        >>> Dictionary.pattern_to_line(pattern)
+        'Pattern\\tphrases|list'
+        """
         return '{}\t{}'.format(pattern['pattern'], '|'.join(pattern['phrases']))
 
     @staticmethod
     def make_pattern(line):
-        """文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
-        [1]はさらに`|`で分割し、文字列のリストとする。"""
+        """
+        文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
+        [1]はさらに`|`で分割し、文字列のリストとする。
+
+        >>> line = 'Pattern\\tphrases|list'
+        >>> Dictionary.make_pattern(line)
+        {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
+        """
         pattern, phrases = line.split('\t')
         if pattern and phrases:
             return {'pattern': pattern, 'phrases': phrases.split('|')}
