@@ -2,7 +2,7 @@ from nose.tools import eq_
 from dictionary import Dictionary
 
 
-class TestDictionary():
+class TestDictionary:
     TEST_PATTERN = {'pattern':
                     {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']},
                     'line': 'Test\tThis|is|test|phrases',

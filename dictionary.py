@@ -55,6 +55,16 @@ class Dictionary:
         """形態素のリストpartsを受け取り、
         名詞のみ'%noun%'に変更した文字列templateをself._templateに追加する。
         名詞が存在しなかった場合、または同じtemplateが存在する場合は何もしない。
+
+        >>> parts = morph.analyze('私はプログラムの女の子です')
+        >>> d = Dictionary()
+        >>> 3 not in d.template
+        True
+        >>> d.study_template(parts)
+        >>> 3 in d.template
+        True
+        >>> d.template[3]
+        ['%noun%は%noun%の%noun%です']
         """
         template = ''
         count = 0
@@ -168,13 +178,14 @@ class Dictionary:
     def __load_file_as_lines(filename):
         """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
         例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
+        lines = []
         try:
             with open(filename, encoding='utf-8') as f:
                 lines = f.read().splitlines()
         except IOError as e:
             print(format_error(e))
         finally:
-            return lines if lines else []
+            return lines
 
     @staticmethod
     def load_markov(filename):
