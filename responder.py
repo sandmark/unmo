@@ -1,9 +1,10 @@
+import abc
 import re
 from random import choice
 import morph
 
 
-class Responder:
+class Responder(metaclass=abc.ABCMeta):
     """AIの応答を制御する思考エンジンの基底クラス。
 
     メソッド:
@@ -19,6 +20,7 @@ class Responder:
         self._name = name
         self._dictionary = dictionary
 
+    @abc.abstractmethod
     def response(self, *args):
         """文字列を受け取り、思考した結果を返す"""
         pass

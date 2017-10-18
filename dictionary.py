@@ -55,6 +55,16 @@ class Dictionary:
         """形態素のリストpartsを受け取り、
         名詞のみ'%noun%'に変更した文字列templateをself._templateに追加する。
         名詞が存在しなかった場合、または同じtemplateが存在する場合は何もしない。
+
+        >>> parts = morph.analyze('私はプログラムの女の子です')
+        >>> d = Dictionary()
+        >>> 3 not in d.template
+        True
+        >>> d.study_template(parts)
+        >>> 3 in d.template
+        True
+        >>> d.template[3]
+        ['%noun%は%noun%の%noun%です']
         """
         template = ''
         count = 0
@@ -100,31 +110,35 @@ class Dictionary:
         辞書を保存するためのファイルを開くデコレータ。
         dict_key - Dictionary.DICTのキー。
         """
-        def _save_file(func):
+        def _save_dictionary(func):
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
                 with open(Dictionary.DICT[dict_key], 'w', encoding='utf-8') as f:
-                    return func(self, f, *args, **kwargs)
+                    result = func(self, *args, **kwargs)
+                    f.write(result)
+                return result
             return wrapper
-        return _save_file
+        return _save_dictionary
 
     @save_dictionary('template')
-    def _save_template(self, f):
+    def _save_template(self):
         """テンプレート辞書を保存する。"""
+        lines = []
         for count, templates in self._template.items():
             for template in templates:
-                f.write('{}\t{}\n'.format(count, template))
+                lines.append('{}\t{}'.format(count, template))
+        return '\n'.join(lines)
 
     @save_dictionary('pattern')
-    def _save_pattern(self, f):
+    def _save_pattern(self):
         """パターン辞書を保存する。"""
         lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
-        f.write('\n'.join(lines))
+        return '\n'.join(lines)
 
     @save_dictionary('random')
-    def _save_random(self, f):
-        """ランダム辞書をdicfileに保存する。"""
-        f.write('\n'.join(self.random))
+    def _save_random(self):
+        """ランダム辞書を保存する。"""
+        return '\n'.join(self.random)
 
     def _find_duplicated_pattern(self, word):
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
@@ -164,13 +178,14 @@ class Dictionary:
     def __load_file_as_lines(filename):
         """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
         例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
+        lines = []
         try:
             with open(filename, encoding='utf-8') as f:
                 lines = f.read().splitlines()
         except IOError as e:
             print(format_error(e))
         finally:
-            return lines if lines else []
+            return lines
 
     @staticmethod
     def load_markov(filename):
@@ -184,13 +199,25 @@ class Dictionary:
 
     @staticmethod
     def pattern_to_line(pattern):
-        """パターンのハッシュを文字列に変換する。"""
+        """
+        パターンのハッシュを文字列に変換する。
+
+        >>> pattern = {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
+        >>> Dictionary.pattern_to_line(pattern)
+        'Pattern\\tphrases|list'
+        """
         return '{}\t{}'.format(pattern['pattern'], '|'.join(pattern['phrases']))
 
     @staticmethod
     def make_pattern(line):
-        """文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
-        [1]はさらに`|`で分割し、文字列のリストとする。"""
+        """
+        文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
+        [1]はさらに`|`で分割し、文字列のリストとする。
+
+        >>> line = 'Pattern\\tphrases|list'
+        >>> Dictionary.make_pattern(line)
+        {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
+        """
         pattern, phrases = line.split('\t')
         if pattern and phrases:
             return {'pattern': pattern, 'phrases': phrases.split('|')}
