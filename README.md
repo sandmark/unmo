@@ -14,7 +14,7 @@
 
     git clone https://github.com/sandmark/unmo.git
     cd unmo/
-    python setup.py
+    python setup.py install
 
 ## 起動
 
