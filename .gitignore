@@ -3,3 +3,7 @@
 /,/
 /.coverage
 /cover/
+/build/
+/dist/
+/unmo.egg-info/
+/unmo/__pycache__/
