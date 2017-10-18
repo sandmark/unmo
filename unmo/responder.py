@@ -1,7 +1,7 @@
 import abc
 import re
 from random import choice
-import morph
+from .morph import is_keyword
 
 
 class Responder(metaclass=abc.ABCMeta):
@@ -68,7 +68,7 @@ class PatternResponder(Responder):
 class TemplateResponder(Responder):
     def response(self, _, parts):
         """形態素解析結果partsに基づいてテンプレートを選択・生成して返す。"""
-        keywords = [word for word, part in parts if morph.is_keyword(part)]
+        keywords = [word for word, part in parts if is_keyword(part)]
         count = len(keywords)
         if count > 0:
             if count in self._dictionary.template:
@@ -83,6 +83,6 @@ class MarkovResponder(Responder):
     def response(self, _, parts):
         """形態素のリストpartsからキーワードを選択し、それに基づく文章を生成して返す。
         キーワードに該当するものがなかった場合はランダム辞書から返す。"""
-        keyword = next((w for w, p in parts if morph.is_keyword(p)), '')
+        keyword = next((w for w, p in parts if is_keyword(p)), '')
         response = self._dictionary.markov.generate(keyword)
         return response if response else choice(self._dictionary.random)

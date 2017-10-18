@@ -6,7 +6,7 @@ import re
 import copy
 import dill
 import tqdm
-import morph
+from .morph import analyze, is_keyword
 
 
 class Markov:
@@ -109,7 +109,7 @@ def main():
                 sentences.extend(re.split(sep, line.strip()))
         for sentence in tqdm.tqdm(sentences):
             if sentence:
-                markov.add_sentence(morph.analyze(sentence))
+                markov.add_sentence(analyze(sentence))
                 # print('.', end='')
                 # sys.stdout.flush()
         markov.save(dicfile)
@@ -119,8 +119,8 @@ def main():
         line = input('> ')
         if not line:
             break
-        parts = morph.analyze(line)
-        keyword = next((word for word, part in parts if morph.is_keyword(part)), '')
+        parts = analyze(line)
+        keyword = next((word for word, part in parts if is_keyword(part)), '')
         print(markov.generate(keyword))
 
 

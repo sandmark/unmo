@@ -1,8 +1,7 @@
 from collections import defaultdict
-import morph
-from markov import Markov
-from util import format_error
 import functools
+from .markov import Markov
+from .util import format_error
 
 
 class Dictionary:

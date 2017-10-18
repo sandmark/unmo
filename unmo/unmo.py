@@ -1,8 +1,8 @@
 from random import randrange
 from janome.tokenizer import Tokenizer
-from responder import WhatResponder, RandomResponder, PatternResponder, TemplateResponder, MarkovResponder
-from dictionary import Dictionary
-import morph
+from .morph import analyze
+from .responder import WhatResponder, RandomResponder, PatternResponder, TemplateResponder, MarkovResponder
+from .dictionary import Dictionary
 
 
 class Unmo:
@@ -48,7 +48,7 @@ class Unmo:
         else:
             self._responder = self._responders['what']
 
-        parts = morph.analyze(text)
+        parts = analyze(text)
         response = self._responder.response(text, parts)
         self._dictionary.study(text, parts)
         return response
