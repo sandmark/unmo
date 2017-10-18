@@ -6,5 +6,4 @@
 /build/
 /dist/
 /unmo.egg-info/
-/unmo/__pycache__/__init__.cpython-36.pyc
 /unmo/__pycache__/
