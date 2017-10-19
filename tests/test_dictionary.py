@@ -34,3 +34,22 @@ class TestDictionary:
         test_line = TestDictionary.TEST_PATTERN['line']
         test_result = TestDictionary.TEST_PATTERN['pattern']
         eq_(Dictionary.make_pattern(test_line), test_result)
+
+    def test_random(self):
+        """Dictionary#random: デフォルトで['こんにちは']というリスト"""
+        eq_(self.dictionary.random, ['こんにちは'])
+
+    def test_study_random(self):
+        """Dictionary#study_random: 発言を学習する"""
+        sentense = 'Hello, World!'
+        eq_(len(self.dictionary.random), 1)
+        self.dictionary.study_random(sentense)
+        eq_(len(self.dictionary.random), 2)
+
+    def test_study_random_if_doubled(self):
+        """Dictionary#study_random: 重複発言は学習しない"""
+        sentense = 'Hello, World!'
+        self.dictionary.study_random(sentense)
+        eq_(len(self.dictionary.random), 2)
+        self.dictionary.study_random(sentense)
+        eq_(len(self.dictionary.random), 2)
