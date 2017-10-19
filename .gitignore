@@ -7,3 +7,4 @@
 /dist/
 /unmo.egg-info/
 /unmo/__pycache__/
+/tests/__pycache__/
