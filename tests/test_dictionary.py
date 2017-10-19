@@ -1,3 +1,6 @@
+"""
+Dictionaryクラスのテストを行うモジュール
+"""
 import os
 import shutil
 import re
