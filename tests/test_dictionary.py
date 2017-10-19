@@ -27,13 +27,13 @@ class TestDictionary:
         ok_(3 in self.dictionary.template)
 
     def test_pattern_to_line(self):
-        test_dict = TestDictionary.TEST_PATTERN['pattern']
-        test_result = TestDictionary.TEST_PATTERN['line']
+        test_dict = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
+        test_result = 'Test\tThis|is|test|phrases'
         eq_(Dictionary.pattern_to_line(test_dict), test_result)
 
     def test_make_pattern(self):
-        test_line = TestDictionary.TEST_PATTERN['line']
-        test_result = TestDictionary.TEST_PATTERN['pattern']
+        test_line = 'Test\tThis|is|test|phrases'
+        test_result = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
         eq_(Dictionary.make_pattern(test_line), test_result)
 
     def test_random(self):
