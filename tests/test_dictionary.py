@@ -119,6 +119,29 @@ class TestDictionary:
         self.dictionary.study_random(sentense)
         eq_(len(self.dictionary.random), 2)
 
+    def test_study_template(self):
+        """Dictionary#study_template: テンプレートを学習する"""
+        eq_(len(self.dictionary.template), 0)
+        parts = analyze('テンプレートを学習する')
+        self.dictionary.study_template(parts)
+        eq_(len(self.dictionary.template), 1)
+        eq_(self.dictionary.template[2], ['%noun%を%noun%する'])
+
+    def test_study_template_with_same_template(self):
+        """Dictionary#study_template: 同じテンプレートは学習しない"""
+        parts1 = analyze('テンプレートを学習する')
+        parts2 = analyze('プログラムを作成する')
+        self.dictionary.study_template(parts1)
+        self.dictionary.study_template(parts2)
+        eq_(len(self.dictionary.template), 1)
+        eq_(self.dictionary.template[2], ['%noun%を%noun%する'])
+
+    def test_study_template_without_nouns(self):
+        """Dictionary#study_template: 名詞がなければ学習しない"""
+        parts = analyze('実はさっきから寒い')
+        self.dictionary.study_template(parts)
+        eq_(len(self.dictionary.template), 0)
+
     def test_study_random_if_doubled(self):
         """Dictionary#study_random: 重複発言は学習しない"""
         sentense = 'Hello, World!'
