@@ -160,7 +160,7 @@ class Dictionary:
     @staticmethod
     @load_dictionary('random')
     def load_random(lines):
-        """ランダム辞書として読み込み、リストを返す。
+        """ランダム辞書を読み込み、リストを返す。
         空である場合、['こんにちは']という一文を追加する。"""
         return lines if lines else ['こんにちは']
 
@@ -170,12 +170,11 @@ class Dictionary:
         return [Dictionary.make_pattern(l) for l in lines]
 
     @staticmethod
-    def load_template(filename=None):
-        """filenameをテンプレート辞書として読み込み、ハッシュを返す。
-        filenameのデフォルト値はDictionary.DICT['template']"""
-        filename = filename if filename else Dictionary.DICT['template']
+    @load_dictionary('template')
+    def load_template(lines):
+        """テンプレート辞書を読み込み、ハッシュを返す。"""
         templates = defaultdict(lambda: [])
-        for line in Dictionary.__load_file_as_lines(filename):
+        for line in lines:
             count, template = line.split('\t')
             if count and template:
                 count = int(count)

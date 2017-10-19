@@ -44,6 +44,19 @@ def test_pattern_save_and_load():
     ok_(patterns[0], {'pattern': word, 'phrases': [sentense]})
 
 
+@with_setup(setup=remove_dic, teardown=remove_dic)
+def test_template_save_and_load():
+    """Dictionary: template: 保存した辞書を読み込める"""
+    sentense = '私はプログラムの女の子です'
+    result = '%noun%は%noun%の%noun%です'
+    parts = analyze(sentense)
+    d1 = Dictionary()
+    d1.study_template(parts)
+    d1.save()
+    d2 = Dictionary()
+    ok_(d2.template[3] == [result])
+
+
 class TestDictionary:
     def setup(self):
         self.dictionary = Dictionary()
