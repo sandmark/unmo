@@ -1,7 +1,9 @@
+import os
 from collections import defaultdict
 import functools
 from .markov import Markov
 from .util import format_error
+from .morph import analyze, is_keyword
 
 
 class Dictionary:
@@ -26,18 +28,20 @@ class Dictionary:
     template -- テンプレート辞書
     """
 
-    DICT = {'random': 'dics/random.txt',
-            'pattern': 'dics/pattern.txt',
-            'template': 'dics/template.txt',
-            'markov': 'dics/markov.dat',
-            }
+    DICT_DIR = 'dics'
+    DICT = {
+        'random': 'random.txt',
+        'pattern': 'pattern.txt',
+        'template': 'template.txt',
+        'markov': 'markov.dat',
+    }
 
     def __init__(self):
         """ファイルから辞書の読み込みを行う。"""
-        self._random = Dictionary.load_random(Dictionary.DICT['random'])
-        self._pattern = Dictionary.load_pattern(Dictionary.DICT['pattern'])
-        self._template = Dictionary.load_template(Dictionary.DICT['template'])
-        self._markov = Dictionary.load_markov(Dictionary.DICT['markov'])
+        self._random = Dictionary.load_random()
+        self._pattern = Dictionary.load_pattern()
+        self._template = Dictionary.load_template()
+        self._markov = Dictionary.load_markov(Dictionary.dicfile('markov'))
 
     def study(self, text, parts):
         """ランダム辞書、パターン辞書、テンプレート辞書をメモリに保存する。"""
@@ -54,21 +58,11 @@ class Dictionary:
         """形態素のリストpartsを受け取り、
         名詞のみ'%noun%'に変更した文字列templateをself._templateに追加する。
         名詞が存在しなかった場合、または同じtemplateが存在する場合は何もしない。
-
-        >>> parts = morph.analyze('私はプログラムの女の子です')
-        >>> d = Dictionary()
-        >>> 3 not in d.template
-        True
-        >>> d.study_template(parts)
-        >>> 3 in d.template
-        True
-        >>> d.template[3]
-        ['%noun%は%noun%の%noun%です']
         """
         template = ''
         count = 0
         for word, part in parts:
-            if morph.is_keyword(part):
+            if is_keyword(part):
                 word = '%noun%'
                 count += 1
             template += word
@@ -85,7 +79,7 @@ class Dictionary:
     def study_pattern(self, text, parts):
         """ユーザーの発言textを、形態素partsに基づいてパターン辞書に保存する。"""
         for word, part in parts:
-            if not morph.is_keyword(part):  # 品詞が名詞でなければ学習しない
+            if not is_keyword(part):  # 品詞が名詞でなければ学習しない
                 continue
 
             # 単語の重複チェック
@@ -99,10 +93,11 @@ class Dictionary:
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
+        dic_markov = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT['markov'])
         self._save_random()
         self._save_pattern()
         self._save_template()
-        self._markov.save(Dictionary.DICT['markov'])
+        self._markov.save(dic_markov)
 
     def save_dictionary(dict_key):
         """
@@ -112,7 +107,12 @@ class Dictionary:
         def _save_dictionary(func):
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
-                with open(Dictionary.DICT[dict_key], 'w', encoding='utf-8') as f:
+                """辞書ファイルを開き、デコレートされた関数を実行する。
+                ディレクトリが存在しない場合は新たに作成する。"""
+                if not os.path.isdir(Dictionary.DICT_DIR):
+                    os.mkdir(Dictionary.DICT_DIR)
+                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                with open(dicfile, 'w', encoding='utf-8') as f:
                     result = func(self, *args, **kwargs)
                     f.write(result)
                 return result
@@ -143,30 +143,38 @@ class Dictionary:
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
         return next((p for p in self._pattern if p['pattern'] == word), None)
 
+    def load_dictionary(dict_key):
+        """辞書ファイルを読み込むためのデコレータ"""
+        def _load_dictionary(func):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                """ファイルを読み込み、行ごとに分割して関数に渡す"""
+                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                if not os.path.exists(dicfile):
+                    return func([], *args, **kwargs)
+                with open(dicfile, encoding='utf-8') as f:
+                    return func(f.read().splitlines(), *args, **kwargs)
+            return wrapper
+        return _load_dictionary
+
     @staticmethod
-    def load_random(filename):
-        """filenameをランダム辞書として読み込み、リストを返す。
-        filenameのデフォルト値はDictionary.DICT['random']
-        戻り値のリストが空である場合、['こんにちは']という一文を追加する。"""
-        filename = filename if filename else Dictionary.DICT['random']
-        lines = Dictionary.__load_file_as_lines(filename)
+    @load_dictionary('random')
+    def load_random(lines):
+        """ランダム辞書を読み込み、リストを返す。
+        空である場合、['こんにちは']という一文を追加する。"""
         return lines if lines else ['こんにちは']
 
     @staticmethod
-    def load_pattern(filename=None):
-        """filenameをパターン辞書として読み込み、リストを返す。
-        filenameのデフォルト値はDictionary.DICT['pattern']"""
-        filename = filename if filename else Dictionary.DICT['pattern']
-        lines = Dictionary.__load_file_as_lines(filename)
+    @load_dictionary('pattern')
+    def load_pattern(lines):
         return [Dictionary.make_pattern(l) for l in lines]
 
     @staticmethod
-    def load_template(filename=None):
-        """filenameをテンプレート辞書として読み込み、ハッシュを返す。
-        filenameのデフォルト値はDictionary.DICT['template']"""
-        filename = filename if filename else Dictionary.DICT['template']
+    @load_dictionary('template')
+    def load_template(lines):
+        """テンプレート辞書を読み込み、ハッシュを返す。"""
         templates = defaultdict(lambda: [])
-        for line in Dictionary.__load_file_as_lines(filename):
+        for line in lines:
             count, template = line.split('\t')
             if count and template:
                 count = int(count)
@@ -174,26 +182,11 @@ class Dictionary:
         return templates
 
     @staticmethod
-    def __load_file_as_lines(filename):
-        """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
-        例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
-        lines = []
-        try:
-            with open(filename, encoding='utf-8') as f:
-                lines = f.read().splitlines()
-        except IOError as e:
-            print(format_error(e))
-        finally:
-            return lines
-
-    @staticmethod
     def load_markov(filename):
         """Markovオブジェクトを生成し、filenameから読み込みを行う。"""
         markov = Markov()
-        try:
+        if os.path.exists(filename):
             markov.load(filename)
-        except IOError as e:
-            print(format_error(e))
         return markov
 
     @staticmethod
@@ -220,6 +213,23 @@ class Dictionary:
         pattern, phrases = line.split('\t')
         if pattern and phrases:
             return {'pattern': pattern, 'phrases': phrases.split('|')}
+
+    @staticmethod
+    def dicfile(key):
+        """
+        辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。
+
+        >>> Dictionary.dicfile('random')
+        'dics/random.txt'
+        >>> Dictionary.dicfile('pattern')
+        'dics/pattern.txt'
+        >>> Dictionary.dicfile('template')
+        'dics/template.txt'
+        >>> Dictionary.dicfile('markov')
+        'dics/markov.dat'
+        """
+        return os.path.join(Dictionary.DICT_DIR,
+                            Dictionary.DICT[key])
 
     @property
     def random(self):

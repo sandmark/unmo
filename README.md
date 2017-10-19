@@ -26,6 +26,11 @@
 
 - [恋するプログラム][book]の著者、秋山 智俊さん
 
+## 変更履歴
+- 0.2.2
+  - 辞書が保存できない場合があるバグを修正しました。
+  - テストコードをリファクタリングしました。
+
 [releases]: https://github.com/sandmark/unmo/releases
 [book]: http://amzn.to/2kYltNz
 [python3]: https://www.python.org/downloads/
