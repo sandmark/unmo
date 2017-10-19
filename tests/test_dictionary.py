@@ -1,6 +1,6 @@
 import os
 import shutil
-from nose.tools import eq_, ok_, with_setup, nottest
+from nose.tools import eq_, ok_
 from unmo.dictionary import Dictionary
 from unmo.morph import analyze, is_keyword
 
