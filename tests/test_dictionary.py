@@ -188,7 +188,7 @@ class TestDictionary:
         sentense = '私はプログラムの女の子です'
         parts = analyze(sentense)
         self.dictionary.study(sentense, parts)
-        eq_(len(self.dictionary.random), 2)
-        eq_(len(self.dictionary.pattern), 3)
-        eq_(len(self.dictionary.template), 1)
-        eq_(len(self.dictionary.markov._starts), 1)
+        eq_(len(self.dictionary.random), 2)          # デフォルト + 1
+        eq_(len(self.dictionary.pattern), 3)         # 名詞の数
+        eq_(len(self.dictionary.template), 1)        # template[3]
+        eq_(len(self.dictionary.markov._starts), 1)  # _starts['私']
