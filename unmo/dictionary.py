@@ -1,3 +1,4 @@
+import os
 from collections import defaultdict
 import functools
 from .markov import Markov
@@ -27,10 +28,11 @@ class Dictionary:
     template -- テンプレート辞書
     """
 
-    DICT = {'random': 'dics/random.txt',
-            'pattern': 'dics/pattern.txt',
-            'template': 'dics/template.txt',
-            'markov': 'dics/markov.dat',
+    DICT_DIR = 'dics'
+    DICT = {'random': 'random.txt',
+            'pattern': 'pattern.txt',
+            'template': 'template.txt',
+            'markov': 'markov.dat',
             }
 
     def __init__(self):
@@ -90,10 +92,11 @@ class Dictionary:
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
+        dic_markov = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT['markov'])
         self._save_random()
         self._save_pattern()
         self._save_template()
-        self._markov.save(Dictionary.DICT['markov'])
+        self._markov.save(dic_markov)
 
     def save_dictionary(dict_key):
         """
@@ -103,7 +106,12 @@ class Dictionary:
         def _save_dictionary(func):
             @functools.wraps(func)
             def wrapper(self, *args, **kwargs):
-                with open(Dictionary.DICT[dict_key], 'w', encoding='utf-8') as f:
+                """辞書ファイルを開き、デコレートされた関数を実行する。
+                ディレクトリが存在しない場合は新たに作成する。"""
+                if not os.path.isdir(Dictionary.DICT_DIR):
+                    os.mkdir(Dictionary.DICT_DIR)
+                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                with open(dicfile, 'w', encoding='utf-8') as f:
                     result = func(self, *args, **kwargs)
                     f.write(result)
                 return result

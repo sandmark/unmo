@@ -1,16 +1,17 @@
-from nose.tools import eq_, ok_
+import os
+import shutil
+from nose.tools import eq_, ok_, with_setup, nottest
 from unmo.dictionary import Dictionary
 from unmo.morph import analyze, is_keyword
 
 
 class TestDictionary:
-    TEST_PATTERN = {'pattern':
-                    {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']},
-                    'line': 'Test\tThis|is|test|phrases',
-                    }
-
     def setup(self):
         self.dictionary = Dictionary()
+
+    def teardown(self):
+        if os.path.isdir(Dictionary.DICT_DIR):
+            shutil.rmtree(Dictionary.DICT_DIR)
 
     def test_study_template_replace_nouns(self):
         """Dictionary#study_template: 形態素のリストを受け取り、名詞のみ%noun%に変換する"""
@@ -53,3 +54,7 @@ class TestDictionary:
         eq_(len(self.dictionary.random), 2)
         self.dictionary.study_random(sentense)
         eq_(len(self.dictionary.random), 2)
+
+    def test_save(self):
+        """Dictionary#save: 正常に保存できる"""
+        self.dictionary.save()
