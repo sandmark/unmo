@@ -2,6 +2,7 @@ from collections import defaultdict
 import functools
 from .markov import Markov
 from .util import format_error
+from .morph import analyze, is_keyword
 
 
 class Dictionary:
@@ -54,21 +55,11 @@ class Dictionary:
         """形態素のリストpartsを受け取り、
         名詞のみ'%noun%'に変更した文字列templateをself._templateに追加する。
         名詞が存在しなかった場合、または同じtemplateが存在する場合は何もしない。
-
-        >>> parts = morph.analyze('私はプログラムの女の子です')
-        >>> d = Dictionary()
-        >>> 3 not in d.template
-        True
-        >>> d.study_template(parts)
-        >>> 3 in d.template
-        True
-        >>> d.template[3]
-        ['%noun%は%noun%の%noun%です']
         """
         template = ''
         count = 0
         for word, part in parts:
-            if morph.is_keyword(part):
+            if is_keyword(part):
                 word = '%noun%'
                 count += 1
             template += word
@@ -85,7 +76,7 @@ class Dictionary:
     def study_pattern(self, text, parts):
         """ユーザーの発言textを、形態素partsに基づいてパターン辞書に保存する。"""
         for word, part in parts:
-            if not morph.is_keyword(part):  # 品詞が名詞でなければ学習しない
+            if not is_keyword(part):  # 品詞が名詞でなければ学習しない
                 continue
 
             # 単語の重複チェック
