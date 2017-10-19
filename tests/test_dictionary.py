@@ -119,6 +119,14 @@ class TestDictionary:
         self.dictionary.study_random(sentense)
         eq_(len(self.dictionary.random), 2)
 
+    def test_study_random_if_doubled(self):
+        """Dictionary#study_random: 重複発言は学習しない"""
+        sentense = 'Hello, World!'
+        self.dictionary.study_random(sentense)
+        eq_(len(self.dictionary.random), 2)
+        self.dictionary.study_random(sentense)
+        eq_(len(self.dictionary.random), 2)
+
     def test_study_template(self):
         """Dictionary#study_template: テンプレートを学習する"""
         eq_(len(self.dictionary.template), 0)
@@ -141,14 +149,6 @@ class TestDictionary:
         parts = analyze('実はさっきから寒い')
         self.dictionary.study_template(parts)
         eq_(len(self.dictionary.template), 0)
-
-    def test_study_random_if_doubled(self):
-        """Dictionary#study_random: 重複発言は学習しない"""
-        sentense = 'Hello, World!'
-        self.dictionary.study_random(sentense)
-        eq_(len(self.dictionary.random), 2)
-        self.dictionary.study_random(sentense)
-        eq_(len(self.dictionary.random), 2)
 
     def test_save(self):
         """Dictionary#save: 正常に保存できる"""
