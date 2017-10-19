@@ -150,6 +150,35 @@ class TestDictionary:
         self.dictionary.study_template(parts)
         eq_(len(self.dictionary.template), 0)
 
+    def test_study_pattern(self):
+        """Dictionary#study_pattern: 名詞の数だけパターンを学習する"""
+        sentense = '名詞の数だけパターンを学習する'
+        parts = analyze(sentense)
+        self.dictionary.study_pattern(sentense, parts)
+        eq_(len(self.dictionary.pattern), 4)
+        nouns = ['名詞', '数', 'パターン', '学習']
+        for pattern in self.dictionary.pattern:
+            ok_(pattern['pattern'] in nouns)
+            eq_(pattern['phrases'], [sentense])
+
+    def test_study_pattern_without_nouns(self):
+        """Dictionary#study_pattern: 名詞がなければ学習しない"""
+        sentense = '実はさっきから寒い'
+        parts = analyze(sentense)
+        self.dictionary.study_pattern(sentense, parts)
+        eq_(len(self.dictionary.pattern), 0)
+
+    def test_study_pattern_with_same_word(self):
+        """Dictionary#study_pattern: 同じ単語があれば追加する"""
+        sentenses = ['波が立つ', '波が引く']
+        parts_per_sentense = [analyze(s) for s in sentenses]
+        for sentense, parts in zip(sentenses, parts_per_sentense):
+            self.dictionary.study_pattern(sentense, parts)
+        eq_(len(self.dictionary.pattern), 1)
+        eq_(self.dictionary.pattern[0]['pattern'], '波')
+        for i, sentense in enumerate(sentenses):
+            eq_(self.dictionary.pattern[0]['phrases'][i], sentense)
+
     def test_save(self):
         """Dictionary#save: 正常に保存できる"""
         self.dictionary.save()
