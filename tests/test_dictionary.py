@@ -23,7 +23,7 @@ def test_init():
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
 def test_random_save_and_load():
-    """Dictionary: random: 保存した辞書を読み込める"""
+    """Dictionary#random: 保存した辞書を読み込める"""
     sentense = 'Hello'
     d1 = Dictionary()
     d1.study_random(sentense)
@@ -34,7 +34,7 @@ def test_random_save_and_load():
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
 def test_pattern_save_and_load():
-    """Dictionary: pattern: 保存した辞書を読み込める"""
+    """Dictionary#pattern: 保存した辞書を読み込める"""
     word = '名詞'
     sentense = '名詞です'
     parts = analyze(sentense)
@@ -49,7 +49,7 @@ def test_pattern_save_and_load():
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
 def test_template_save_and_load():
-    """Dictionary: template: 保存した辞書を読み込める"""
+    """Dictionary#template: 保存した辞書を読み込める"""
     sentense = '私はプログラムの女の子です'
     result = '%noun%は%noun%の%noun%です'
     parts = analyze(sentense)
@@ -62,7 +62,7 @@ def test_template_save_and_load():
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
 def test_markov_save_and_load():
-    """Dictionary: markov: 保存した辞書を読み込める"""
+    """Dictionary#markov: 保存した辞書を読み込める"""
     sentense = '私はプログラムの女の子です'
     parts = analyze(sentense)
     d1 = Dictionary()
