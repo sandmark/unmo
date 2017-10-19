@@ -38,10 +38,10 @@ class Dictionary:
 
     def __init__(self):
         """ファイルから辞書の読み込みを行う。"""
-        self._random = Dictionary.load_random(Dictionary.DICT['random'])
-        self._pattern = Dictionary.load_pattern(Dictionary.DICT['pattern'])
-        self._template = Dictionary.load_template(Dictionary.DICT['template'])
-        self._markov = Dictionary.load_markov(Dictionary.DICT['markov'])
+        self._random = Dictionary.load_random()
+        self._pattern = Dictionary.load_pattern()
+        self._template = Dictionary.load_template()
+        self._markov = Dictionary.load_markov(Dictionary.dicfile('markov'))
 
     def study(self, text, parts):
         """ランダム辞書、パターン辞書、テンプレート辞書をメモリに保存する。"""
@@ -143,21 +143,30 @@ class Dictionary:
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
         return next((p for p in self._pattern if p['pattern'] == word), None)
 
+    def load_dictionary(dict_key):
+        """辞書ファイルを読み込むためのデコレータ"""
+        def _load_dictionary(func):
+            @functools.wraps(func)
+            def wrapper(*args, **kwargs):
+                """ファイルを読み込み、行ごとに分割して関数に渡す"""
+                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                if not os.path.exists(dicfile):
+                    return func([], *args, **kwargs)
+                with open(dicfile, encoding='utf-8') as f:
+                    return func(f.read().splitlines(), *args, **kwargs)
+            return wrapper
+        return _load_dictionary
+
     @staticmethod
-    def load_random(filename):
-        """filenameをランダム辞書として読み込み、リストを返す。
-        filenameのデフォルト値はDictionary.DICT['random']
-        戻り値のリストが空である場合、['こんにちは']という一文を追加する。"""
-        filename = filename if filename else Dictionary.DICT['random']
-        lines = Dictionary.__load_file_as_lines(filename)
+    @load_dictionary('random')
+    def load_random(lines):
+        """ランダム辞書として読み込み、リストを返す。
+        空である場合、['こんにちは']という一文を追加する。"""
         return lines if lines else ['こんにちは']
 
     @staticmethod
-    def load_pattern(filename=None):
-        """filenameをパターン辞書として読み込み、リストを返す。
-        filenameのデフォルト値はDictionary.DICT['pattern']"""
-        filename = filename if filename else Dictionary.DICT['pattern']
-        lines = Dictionary.__load_file_as_lines(filename)
+    @load_dictionary('pattern')
+    def load_pattern(lines):
         return [Dictionary.make_pattern(l) for l in lines]
 
     @staticmethod
@@ -220,6 +229,23 @@ class Dictionary:
         pattern, phrases = line.split('\t')
         if pattern and phrases:
             return {'pattern': pattern, 'phrases': phrases.split('|')}
+
+    @staticmethod
+    def dicfile(key):
+        """
+        辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。
+
+        >>> Dictionary.dicfile('random')
+        'dics/random.txt'
+        >>> Dictionary.dicfile('pattern')
+        'dics/pattern.txt'
+        >>> Dictionary.dicfile('template')
+        'dics/template.txt'
+        >>> Dictionary.dicfile('markov')
+        'dics/markov.dat'
+        """
+        return os.path.join(Dictionary.DICT_DIR,
+                            Dictionary.DICT[key])
 
     @property
     def random(self):

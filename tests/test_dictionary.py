@@ -1,6 +1,7 @@
 import os
 import shutil
-from nose.tools import eq_, ok_
+import re
+from nose.tools import eq_, ok_, with_setup
 from unmo.dictionary import Dictionary
 from unmo.morph import analyze, is_keyword
 
@@ -11,10 +12,36 @@ def remove_dic():
         shutil.rmtree(Dictionary.DICT_DIR)
 
 
+@with_setup(setup=remove_dic)
 def test_init():
-    """辞書ファイルが無くても読み込みできる"""
-    remove_dic()
+    """Dictionary: 辞書ファイルが無くても読み込みできる"""
     Dictionary()
+
+
+@with_setup(setup=remove_dic, teardown=remove_dic)
+def test_random_save_and_load():
+    """Dictionary: random: 保存した辞書を読み込める"""
+    sentense = 'Hello'
+    d1 = Dictionary()
+    d1.study_random(sentense)
+    d1.save()
+    d2 = Dictionary()
+    ok_(sentense in d2.random)
+
+
+@with_setup(setup=remove_dic, teardown=remove_dic)
+def test_pattern_save_and_load():
+    """Dictionary: pattern: 保存した辞書を読み込める"""
+    word = '名詞'
+    sentense = '名詞です'
+    parts = analyze(sentense)
+    d1 = Dictionary()
+    d1.study_pattern(sentense, parts)
+    d1.save()
+    d2 = Dictionary()
+    patterns = [ptn for ptn in d2.pattern if re.search(ptn['pattern'], sentense)]
+    eq_(len(patterns), 1)
+    ok_(patterns[0], {'pattern': word, 'phrases': [sentense]})
 
 
 class TestDictionary:
