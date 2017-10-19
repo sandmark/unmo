@@ -182,26 +182,11 @@ class Dictionary:
         return templates
 
     @staticmethod
-    def __load_file_as_lines(filename):
-        """filenameをutf-8で読み込み、改行で区切った文字列のリストを返す。
-        例外IOErrorが発生した場合、詳細を標準出力へprintする。"""
-        lines = []
-        try:
-            with open(filename, encoding='utf-8') as f:
-                lines = f.read().splitlines()
-        except IOError as e:
-            print(format_error(e))
-        finally:
-            return lines
-
-    @staticmethod
     def load_markov(filename):
         """Markovオブジェクトを生成し、filenameから読み込みを行う。"""
         markov = Markov()
-        try:
+        if os.path.exists(filename):
             markov.load(filename)
-        except IOError as e:
-            print(format_error(e))
         return markov
 
     @staticmethod

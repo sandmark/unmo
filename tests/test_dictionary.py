@@ -57,6 +57,18 @@ def test_template_save_and_load():
     ok_(d2.template[3] == [result])
 
 
+@with_setup(setup=remove_dic, teardown=remove_dic)
+def test_markov_save_and_load():
+    """Dictionary: markov: 保存した辞書を読み込める"""
+    sentense = '私はプログラムの女の子です'
+    parts = analyze(sentense)
+    d1 = Dictionary()
+    d1.study_markov(parts)
+    d1.save()
+    d2 = Dictionary()
+    ok_(d2.markov.generate('私').startswith('私は'))
+
+
 class TestDictionary:
     def setup(self):
         self.dictionary = Dictionary()
