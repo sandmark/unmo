@@ -29,11 +29,12 @@ class Dictionary:
     """
 
     DICT_DIR = 'dics'
-    DICT = {'random': 'random.txt',
-            'pattern': 'pattern.txt',
-            'template': 'template.txt',
-            'markov': 'markov.dat',
-            }
+    DICT = {
+        'random': 'random.txt',
+        'pattern': 'pattern.txt',
+        'template': 'template.txt',
+        'markov': 'markov.dat',
+    }
 
     def __init__(self):
         """ファイルから辞書の読み込みを行う。"""
