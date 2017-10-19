@@ -69,7 +69,23 @@ def test_markov_save_and_load():
     ok_(d2.markov.generate('私').startswith('私は'))
 
 
+def test_pattern_to_line():
+    """Dictionary.pattern_to_line: パターンハッシュを一行の文字列にする"""
+    test_dict = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
+    test_result = 'Test\tThis|is|test|phrases'
+    eq_(Dictionary.pattern_to_line(test_dict), test_result)
+
+
+def test_make_pattern():
+    """Dictionary.make_pattern: 一行の文字列からパターンハッシュを作る"""
+    test_line = 'Test\tThis|is|test|phrases'
+    test_result = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
+    eq_(Dictionary.make_pattern(test_line), test_result)
+
+
 class TestDictionary:
+    """Dictionaryオブジェクトのメソッドテスト"""
+
     def setup(self):
         self.dictionary = Dictionary()
 
@@ -88,16 +104,6 @@ class TestDictionary:
         ok_(3 not in self.dictionary.template)
         self.dictionary.study_template(parts)
         ok_(3 in self.dictionary.template)
-
-    def test_pattern_to_line(self):
-        test_dict = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
-        test_result = 'Test\tThis|is|test|phrases'
-        eq_(Dictionary.pattern_to_line(test_dict), test_result)
-
-    def test_make_pattern(self):
-        test_line = 'Test\tThis|is|test|phrases'
-        test_result = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
-        eq_(Dictionary.make_pattern(test_line), test_result)
 
     def test_random(self):
         """Dictionary#random: デフォルトで['こんにちは']というリスト"""
