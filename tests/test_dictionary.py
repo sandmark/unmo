@@ -9,7 +9,7 @@ class TestDictionary:
                     'line': 'Test\tThis|is|test|phrases',
                     }
 
-    def __init__(self):
+    def setup(self):
         self.dictionary = Dictionary()
 
     def test_study_template_replace_nouns(self):
