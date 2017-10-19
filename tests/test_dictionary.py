@@ -121,3 +121,13 @@ class TestDictionary:
     def test_save(self):
         """Dictionary#save: 正常に保存できる"""
         self.dictionary.save()
+
+    def test_study(self):
+        """Dictionary#study: すべての辞書に学習させる"""
+        sentense = '私はプログラムの女の子です'
+        parts = analyze(sentense)
+        self.dictionary.study(sentense, parts)
+        eq_(len(self.dictionary.random), 2)
+        eq_(len(self.dictionary.pattern), 3)
+        eq_(len(self.dictionary.template), 1)
+        eq_(len(self.dictionary.markov._starts), 1)
