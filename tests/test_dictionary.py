@@ -5,13 +5,24 @@ from unmo.dictionary import Dictionary
 from unmo.morph import analyze, is_keyword
 
 
+def remove_dic():
+    """辞書ファイルを削除する"""
+    if os.path.isdir(Dictionary.DICT_DIR):
+        shutil.rmtree(Dictionary.DICT_DIR)
+
+
+def test_init():
+    """辞書ファイルが無くても読み込みできる"""
+    remove_dic()
+    Dictionary()
+
+
 class TestDictionary:
     def setup(self):
         self.dictionary = Dictionary()
 
     def teardown(self):
-        if os.path.isdir(Dictionary.DICT_DIR):
-            shutil.rmtree(Dictionary.DICT_DIR)
+        remove_dic()
 
     def test_study_template_replace_nouns(self):
         """Dictionary#study_template: 形態素のリストを受け取り、名詞のみ%noun%に変換する"""
