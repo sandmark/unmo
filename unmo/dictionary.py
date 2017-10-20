@@ -168,6 +168,7 @@ class Dictionary:
     @staticmethod
     @load_dictionary('pattern')
     def load_pattern(lines):
+        """パターン辞書を読み込み、パターンハッシュのリストを返す。"""
         return [Dictionary.line2pattern(l) for l in lines]
 
     @staticmethod
