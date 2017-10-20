@@ -26,6 +26,7 @@ class Dictionary:
     random -- ランダム辞書
     pattern -- パターン辞書
     template -- テンプレート辞書
+    markov -- マルコフ辞書
     """
 
     DICT_DIR = 'dics'
