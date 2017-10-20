@@ -2,6 +2,7 @@
 Dictionaryクラスのテストを行うモジュール
 """
 import os
+import contextlib
 from pathlib import Path
 import shutil
 import re
@@ -11,6 +12,15 @@ from unmo.morph import analyze
 
 
 HOME = str(Path.home())
+
+
+@contextlib.contextmanager
+def save_dictionary():
+    try:
+        dictionary = Dictionary()
+        yield dictionary
+    finally:
+        dictionary.save()
 
 
 def remove_dic():
