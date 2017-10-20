@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 def main():
     setup(
         name='unmo',
-        version='0.2',
+        version='0.2.3',
         description='A legacy chat bot written in pure python',
         author='sandmark',
         author_email='sandmark.m@gmail.com',
