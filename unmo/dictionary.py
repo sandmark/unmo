@@ -11,8 +11,8 @@ class Dictionary:
     """思考エンジンの辞書クラス。
 
     クラス変数:
-    DICT_RANDOM -- ランダム辞書のファイル名
-    DICT_PATTERN -- パターン辞書のファイル名
+    DICT_DIR -- 辞書ファイルを保存するディレクトリ（'$HOME/.unmo/dics/'）
+    DICT -- 辞書ファイル名
 
     スタティックメソッド:
     line2pattern(str) -- パターン辞書読み込み用のヘルパー
