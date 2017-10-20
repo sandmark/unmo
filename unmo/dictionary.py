@@ -95,7 +95,7 @@ class Dictionary:
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
-        dic_markov = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT['markov'])
+        dic_markov = Dictionary.dicfile('markov')
         self._save_random()
         self._save_pattern()
         self._save_template()
