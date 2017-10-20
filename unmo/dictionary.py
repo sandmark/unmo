@@ -17,6 +17,7 @@ class Dictionary:
     スタティックメソッド:
     line2pattern(str) -- パターン辞書読み込み用のヘルパー
     pattern2line(pattern) -- パターンハッシュをパターン辞書形式に変換する
+    dicfile(key) -- keyで指定された辞書のフルパスを返す
 
     load_random(file) -- fileからランダム辞書の読み込みを行う
     load_pattern(file) -- fileからパターン辞書の読み込みを行う
