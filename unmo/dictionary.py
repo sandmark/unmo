@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from collections import defaultdict
 import functools
 from .markov import Markov
@@ -29,7 +30,7 @@ class Dictionary:
     markov -- マルコフ辞書
     """
 
-    DICT_DIR = 'dics'
+    DICT_DIR = os.path.join(str(Path.home()), '.unmo', 'dics')
     DICT = {
         'random': 'random.txt',
         'pattern': 'pattern.txt',
@@ -111,8 +112,8 @@ class Dictionary:
                 """辞書ファイルを開き、デコレートされた関数を実行する。
                 ディレクトリが存在しない場合は新たに作成する。"""
                 if not os.path.isdir(Dictionary.DICT_DIR):
-                    os.mkdir(Dictionary.DICT_DIR)
-                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                    os.makedirs(Dictionary.DICT_DIR)
+                dicfile = Dictionary.dicfile(dict_key)
                 with open(dicfile, 'w', encoding='utf-8') as f:
                     result = func(self, *args, **kwargs)
                     f.write(result)

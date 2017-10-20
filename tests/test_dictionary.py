@@ -2,11 +2,15 @@
 Dictionaryクラスのテストを行うモジュール
 """
 import os
+from pathlib import Path
 import shutil
 import re
 from nose.tools import eq_, ok_, with_setup
 from unmo.dictionary import Dictionary
 from unmo.morph import analyze
+
+
+HOME = str(Path.home())
 
 
 def remove_dic():
@@ -19,6 +23,18 @@ def remove_dic():
 def test_init():
     """Dictionary: 辞書ファイルが無くても読み込みできる"""
     Dictionary()
+
+
+@with_setup(setup=remove_dic, teardown=remove_dic)
+def test_dictionary_dir():
+    """Dictionary#save: 辞書ファイルは~/.unmo/dics/に保存する"""
+    sentense = 'こんにちは'
+    parts = analyze(sentense)
+    d = Dictionary()
+    d.study(sentense, parts)
+    d.save()
+    dics_dir = os.path.join(HOME, '.unmo', 'dics')
+    ok_(os.path.isdir(dics_dir))
 
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
