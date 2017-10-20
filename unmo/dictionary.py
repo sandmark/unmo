@@ -22,6 +22,7 @@ class Dictionary:
     load_pattern() -- パターン辞書の読み込みを行う
     load_template() -- テンプレート辞書の読み込みを行う
     load_markov() -- マルコフ辞書の読み込みを行う
+    readlines(key) -- keyで指定された辞書ファイルを読み込み、行ごとのリストを返す
 
     プロパティ:
     random -- ランダム辞書
