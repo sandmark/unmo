@@ -3,8 +3,7 @@ from pathlib import Path
 from collections import defaultdict
 import functools
 from .markov import Markov
-from .util import format_error
-from .morph import analyze, is_keyword
+from .morph import is_keyword
 
 
 class Dictionary:
