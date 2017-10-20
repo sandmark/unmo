@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 from collections import defaultdict
 import functools
 from .markov import Markov
@@ -14,8 +15,8 @@ class Dictionary:
     DICT_PATTERN -- パターン辞書のファイル名
 
     スタティックメソッド:
-    make_pattern(str) -- パターン辞書読み込み用のヘルパー
-    pattern_to_line(pattern) -- パターンハッシュをパターン辞書形式に変換する
+    line2pattern(str) -- パターン辞書読み込み用のヘルパー
+    pattern2line(pattern) -- パターンハッシュをパターン辞書形式に変換する
 
     load_random(file) -- fileからランダム辞書の読み込みを行う
     load_pattern(file) -- fileからパターン辞書の読み込みを行う
@@ -26,9 +27,10 @@ class Dictionary:
     random -- ランダム辞書
     pattern -- パターン辞書
     template -- テンプレート辞書
+    markov -- マルコフ辞書
     """
 
-    DICT_DIR = 'dics'
+    DICT_DIR = os.path.join(str(Path.home()), '.unmo', 'dics')
     DICT = {
         'random': 'random.txt',
         'pattern': 'pattern.txt',
@@ -110,8 +112,8 @@ class Dictionary:
                 """辞書ファイルを開き、デコレートされた関数を実行する。
                 ディレクトリが存在しない場合は新たに作成する。"""
                 if not os.path.isdir(Dictionary.DICT_DIR):
-                    os.mkdir(Dictionary.DICT_DIR)
-                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                    os.makedirs(Dictionary.DICT_DIR)
+                dicfile = Dictionary.dicfile(dict_key)
                 with open(dicfile, 'w', encoding='utf-8') as f:
                     result = func(self, *args, **kwargs)
                     f.write(result)
@@ -131,7 +133,7 @@ class Dictionary:
     @save_dictionary('pattern')
     def _save_pattern(self):
         """パターン辞書を保存する。"""
-        lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
+        lines = [Dictionary.pattern2line(p) for p in self._pattern]
         return '\n'.join(lines)
 
     @save_dictionary('random')
@@ -167,7 +169,8 @@ class Dictionary:
     @staticmethod
     @load_dictionary('pattern')
     def load_pattern(lines):
-        return [Dictionary.make_pattern(l) for l in lines]
+        """パターン辞書を読み込み、パターンハッシュのリストを返す。"""
+        return [Dictionary.line2pattern(l) for l in lines]
 
     @staticmethod
     @load_dictionary('template')
@@ -190,24 +193,24 @@ class Dictionary:
         return markov
 
     @staticmethod
-    def pattern_to_line(pattern):
+    def pattern2line(pattern):
         """
         パターンのハッシュを文字列に変換する。
 
         >>> pattern = {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
-        >>> Dictionary.pattern_to_line(pattern)
+        >>> Dictionary.pattern2line(pattern)
         'Pattern\\tphrases|list'
         """
         return '{}\t{}'.format(pattern['pattern'], '|'.join(pattern['phrases']))
 
     @staticmethod
-    def make_pattern(line):
+    def line2pattern(line):
         """
         文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
         [1]はさらに`|`で分割し、文字列のリストとする。
 
         >>> line = 'Pattern\\tphrases|list'
-        >>> Dictionary.make_pattern(line)
+        >>> Dictionary.line2pattern(line)
         {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
         """
         pattern, phrases = line.split('\t')
@@ -216,20 +219,8 @@ class Dictionary:
 
     @staticmethod
     def dicfile(key):
-        """
-        辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。
-
-        >>> Dictionary.dicfile('random')
-        'dics/random.txt'
-        >>> Dictionary.dicfile('pattern')
-        'dics/pattern.txt'
-        >>> Dictionary.dicfile('template')
-        'dics/template.txt'
-        >>> Dictionary.dicfile('markov')
-        'dics/markov.dat'
-        """
-        return os.path.join(Dictionary.DICT_DIR,
-                            Dictionary.DICT[key])
+        """辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。"""
+        return os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[key])
 
     @property
     def random(self):
