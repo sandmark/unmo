@@ -40,9 +40,8 @@ def test_dictionary_dir():
     """Dictionary#save: 辞書ファイルは~/.unmo/dics/に保存する"""
     sentense = 'こんにちは'
     parts = analyze(sentense)
-    d = Dictionary()
-    d.study(sentense, parts)
-    d.save()
+    with save_dictionary() as d:
+        d.study(sentense, parts)
     dics_dir = os.path.join(HOME, '.unmo', 'dics')
     ok_(os.path.isdir(dics_dir))
 
@@ -51,11 +50,10 @@ def test_dictionary_dir():
 def test_random_save_and_load():
     """Dictionary#random: 保存した辞書を読み込める"""
     sentense = 'Hello'
-    d1 = Dictionary()
-    d1.study_random(sentense)
-    d1.save()
-    d2 = Dictionary()
-    ok_(sentense in d2.random)
+    with save_dictionary() as d:
+        d.study_random(sentense)
+    with save_dictionary() as d:
+        ok_(sentense in d.random)
 
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
@@ -64,13 +62,12 @@ def test_pattern_save_and_load():
     word = '名詞'
     sentense = '名詞です'
     parts = analyze(sentense)
-    d1 = Dictionary()
-    d1.study_pattern(sentense, parts)
-    d1.save()
-    d2 = Dictionary()
-    patterns = [ptn for ptn in d2.pattern if re.search(ptn['pattern'], sentense)]
-    eq_(len(patterns), 1)
-    ok_(patterns[0], {'pattern': word, 'phrases': [sentense]})
+    with save_dictionary() as d:
+        d.study_pattern(sentense, parts)
+    with save_dictionary() as d:
+        patterns = [ptn for ptn in d.pattern if re.search(ptn['pattern'], sentense)]
+        eq_(len(patterns), 1)
+        ok_(patterns[0], {'pattern': word, 'phrases': [sentense]})
 
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
@@ -79,11 +76,10 @@ def test_template_save_and_load():
     sentense = '私はプログラムの女の子です'
     result = '%noun%は%noun%の%noun%です'
     parts = analyze(sentense)
-    d1 = Dictionary()
-    d1.study_template(parts)
-    d1.save()
-    d2 = Dictionary()
-    ok_(d2.template[3] == [result])
+    with save_dictionary() as d:
+        d.study_template(parts)
+    with save_dictionary() as d:
+        ok_(d.template[3] == [result])
 
 
 @with_setup(setup=remove_dic, teardown=remove_dic)
@@ -91,11 +87,10 @@ def test_markov_save_and_load():
     """Dictionary#markov: 保存した辞書を読み込める"""
     sentense = '私はプログラムの女の子です'
     parts = analyze(sentense)
-    d1 = Dictionary()
-    d1.study_markov(parts)
-    d1.save()
-    d2 = Dictionary()
-    ok_(d2.markov.generate('私').startswith('私は'))
+    with save_dictionary() as d:
+        d.study_markov(parts)
+    with save_dictionary() as d:
+        ok_(d.markov.generate('私').startswith('私は'))
 
 
 def test_pattern_to_line():
