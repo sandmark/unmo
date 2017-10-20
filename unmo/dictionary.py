@@ -151,7 +151,7 @@ class Dictionary:
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
                 """ファイルを読み込み、行ごとに分割して関数に渡す"""
-                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
+                dicfile = Dictionary.dicfile(dict_key)
                 if not os.path.exists(dicfile):
                     return func([], *args, **kwargs)
                 with open(dicfile, encoding='utf-8') as f:
