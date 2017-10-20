@@ -6,7 +6,7 @@ import shutil
 import re
 from nose.tools import eq_, ok_, with_setup
 from unmo.dictionary import Dictionary
-from unmo.morph import analyze, is_keyword
+from unmo.morph import analyze
 
 
 def remove_dic():
