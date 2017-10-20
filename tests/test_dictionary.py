@@ -16,8 +16,8 @@ HOME = str(Path.home())
 
 @contextlib.contextmanager
 def save_dictionary():
+    dictionary = Dictionary()
     try:
-        dictionary = Dictionary()
         yield dictionary
     finally:
         dictionary.save()
