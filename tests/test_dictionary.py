@@ -73,17 +73,17 @@ def test_markov_save_and_load():
 
 
 def test_pattern_to_line():
-    """Dictionary.pattern_to_line: パターンハッシュを一行の文字列にする"""
+    """Dictionary.pattern2line: パターンハッシュを一行の文字列にする"""
     test_dict = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
     test_result = 'Test\tThis|is|test|phrases'
-    eq_(Dictionary.pattern_to_line(test_dict), test_result)
+    eq_(Dictionary.pattern2line(test_dict), test_result)
 
 
-def test_make_pattern():
-    """Dictionary.make_pattern: 一行の文字列からパターンハッシュを作る"""
+def test_line2pattern():
+    """Dictionary.line2pattern: 一行の文字列からパターンハッシュを作る"""
     test_line = 'Test\tThis|is|test|phrases'
     test_result = {'pattern': 'Test', 'phrases': ['This', 'is', 'test', 'phrases']}
-    eq_(Dictionary.make_pattern(test_line), test_result)
+    eq_(Dictionary.line2pattern(test_line), test_result)
 
 
 class TestDictionary:

@@ -14,8 +14,8 @@ class Dictionary:
     DICT_PATTERN -- パターン辞書のファイル名
 
     スタティックメソッド:
-    make_pattern(str) -- パターン辞書読み込み用のヘルパー
-    pattern_to_line(pattern) -- パターンハッシュをパターン辞書形式に変換する
+    line2pattern(str) -- パターン辞書読み込み用のヘルパー
+    pattern2line(pattern) -- パターンハッシュをパターン辞書形式に変換する
 
     load_random(file) -- fileからランダム辞書の読み込みを行う
     load_pattern(file) -- fileからパターン辞書の読み込みを行う
@@ -132,7 +132,7 @@ class Dictionary:
     @save_dictionary('pattern')
     def _save_pattern(self):
         """パターン辞書を保存する。"""
-        lines = [Dictionary.pattern_to_line(p) for p in self._pattern]
+        lines = [Dictionary.pattern2line(p) for p in self._pattern]
         return '\n'.join(lines)
 
     @save_dictionary('random')
@@ -168,7 +168,7 @@ class Dictionary:
     @staticmethod
     @load_dictionary('pattern')
     def load_pattern(lines):
-        return [Dictionary.make_pattern(l) for l in lines]
+        return [Dictionary.line2pattern(l) for l in lines]
 
     @staticmethod
     @load_dictionary('template')
@@ -191,24 +191,24 @@ class Dictionary:
         return markov
 
     @staticmethod
-    def pattern_to_line(pattern):
+    def pattern2line(pattern):
         """
         パターンのハッシュを文字列に変換する。
 
         >>> pattern = {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
-        >>> Dictionary.pattern_to_line(pattern)
+        >>> Dictionary.pattern2line(pattern)
         'Pattern\\tphrases|list'
         """
         return '{}\t{}'.format(pattern['pattern'], '|'.join(pattern['phrases']))
 
     @staticmethod
-    def make_pattern(line):
+    def line2pattern(line):
         """
         文字列lineを\tで分割し、{'pattern': [0], 'phrases': [1]}の形式で返す。
         [1]はさらに`|`で分割し、文字列のリストとする。
 
         >>> line = 'Pattern\\tphrases|list'
-        >>> Dictionary.make_pattern(line)
+        >>> Dictionary.line2pattern(line)
         {'pattern': 'Pattern', 'phrases': ['phrases', 'list']}
         """
         pattern, phrases = line.split('\t')
