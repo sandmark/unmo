@@ -218,20 +218,8 @@ class Dictionary:
 
     @staticmethod
     def dicfile(key):
-        """
-        辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。
-
-        >>> Dictionary.dicfile('random')
-        'dics/random.txt'
-        >>> Dictionary.dicfile('pattern')
-        'dics/pattern.txt'
-        >>> Dictionary.dicfile('template')
-        'dics/template.txt'
-        >>> Dictionary.dicfile('markov')
-        'dics/markov.dat'
-        """
-        return os.path.join(Dictionary.DICT_DIR,
-                            Dictionary.DICT[key])
+        """辞書ファイルのパスを 'DICT_DIR/DICT[key]' の形式で返す。"""
+        return os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[key])
 
     @property
     def random(self):

@@ -86,6 +86,13 @@ def test_line2pattern():
     eq_(Dictionary.line2pattern(test_line), test_result)
 
 
+def test_dicfile():
+    """Dictionary.dicfile: 辞書ファイルのフルパスを返す"""
+    for key in ('random', 'pattern', 'template', 'markov'):
+        ext = '.txt' if not key == 'markov' else '.dat'
+        eq_(Dictionary.dicfile(key), os.path.join(Dictionary.DICT_DIR, key) + ext)
+
+
 class TestDictionary:
     """Dictionaryオブジェクトのメソッドテスト"""
 
