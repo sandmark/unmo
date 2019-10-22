@@ -3,25 +3,25 @@ from pathlib import Path
 from collections import defaultdict
 import functools
 from .markov import Markov
-from .util import format_error
-from .morph import analyze, is_keyword
+from .morph import is_keyword
 
 
 class Dictionary:
     """思考エンジンの辞書クラス。
 
     クラス変数:
-    DICT_RANDOM -- ランダム辞書のファイル名
-    DICT_PATTERN -- パターン辞書のファイル名
+    DICT_DIR -- 辞書ファイルを保存するディレクトリ（'$HOME/.unmo/dics/'）
+    DICT -- 辞書ファイル名
 
     スタティックメソッド:
     line2pattern(str) -- パターン辞書読み込み用のヘルパー
     pattern2line(pattern) -- パターンハッシュをパターン辞書形式に変換する
-
-    load_random(file) -- fileからランダム辞書の読み込みを行う
-    load_pattern(file) -- fileからパターン辞書の読み込みを行う
-    load_template(file) -- fileからテンプレート辞書の読み込みを行う
-    load_markov(file) -- fileからマルコフ辞書の読み込みを行う
+    dicfile(key) -- keyで指定された辞書のフルパスを返す
+    load_random() -- ランダム辞書の読み込みを行う
+    load_pattern() -- パターン辞書の読み込みを行う
+    load_template() -- テンプレート辞書の読み込みを行う
+    load_markov() -- マルコフ辞書の読み込みを行う
+    readlines(key) -- keyで指定された辞書ファイルを読み込み、行ごとのリストを返す
 
     プロパティ:
     random -- ランダム辞書
@@ -95,7 +95,7 @@ class Dictionary:
 
     def save(self):
         """メモリ上の辞書をファイルに保存する。"""
-        dic_markov = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT['markov'])
+        dic_markov = Dictionary.dicfile('markov')
         self._save_random()
         self._save_pattern()
         self._save_template()
@@ -145,37 +145,33 @@ class Dictionary:
         """パターン辞書に名詞wordがあればパターンハッシュを、無ければNoneを返す。"""
         return next((p for p in self._pattern if p['pattern'] == word), None)
 
-    def load_dictionary(dict_key):
-        """辞書ファイルを読み込むためのデコレータ"""
-        def _load_dictionary(func):
-            @functools.wraps(func)
-            def wrapper(*args, **kwargs):
-                """ファイルを読み込み、行ごとに分割して関数に渡す"""
-                dicfile = os.path.join(Dictionary.DICT_DIR, Dictionary.DICT[dict_key])
-                if not os.path.exists(dicfile):
-                    return func([], *args, **kwargs)
-                with open(dicfile, encoding='utf-8') as f:
-                    return func(f.read().splitlines(), *args, **kwargs)
-            return wrapper
-        return _load_dictionary
+    @staticmethod
+    def readlines(dictkey):
+        """dictkeyで指定された辞書ファイルを読み込み、行で区切ったリストを返す。"""
+        dicfile = Dictionary.dicfile(dictkey)
+        if not os.path.exists(dicfile):
+            return []
+
+        with open(dicfile, encoding='utf-8') as f:
+            return f.read().splitlines()
 
     @staticmethod
-    @load_dictionary('random')
-    def load_random(lines):
+    def load_random():
         """ランダム辞書を読み込み、リストを返す。
         空である場合、['こんにちは']という一文を追加する。"""
+        lines = Dictionary.readlines('random')
         return lines if lines else ['こんにちは']
 
     @staticmethod
-    @load_dictionary('pattern')
-    def load_pattern(lines):
+    def load_pattern():
         """パターン辞書を読み込み、パターンハッシュのリストを返す。"""
+        lines = Dictionary.readlines('pattern')
         return [Dictionary.line2pattern(l) for l in lines]
 
     @staticmethod
-    @load_dictionary('template')
-    def load_template(lines):
+    def load_template():
         """テンプレート辞書を読み込み、ハッシュを返す。"""
+        lines = Dictionary.readlines('template')
         templates = defaultdict(lambda: [])
         for line in lines:
             count, template = line.split('\t')
