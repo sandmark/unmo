@@ -39,14 +39,12 @@ class Unmo:
         chance = randrange(0, 100)
         if chance in range(0, 29):
             self._responder = self._responders['pattern']
-        elif chance in range(30, 49):
+        elif chance in range(30, 32):
             self._responder = self._responders['template']
-        elif chance in range(50, 69):
+        elif chance in range(33, 35):
             self._responder = self._responders['random']
-        elif chance in range(70, 89):
-            self._responder = self._responders['markov']
         else:
-            self._responder = self._responders['what']
+            self._responder = self._responders['markov']
 
         parts = analyze(text)
         response = self._responder.response(text, parts)
